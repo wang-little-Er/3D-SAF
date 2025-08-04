@@ -12,11 +12,10 @@ from sklearn.metrics import roc_auc_score
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-class ViT(nn.Module):  # 初始化ViT，使用谷歌权重，并冻结所有权重
+class ViT(nn.Module):  # 初始化ViT，并冻结所有权重
     def __init__(self):
         super().__init__()
-        self.model = ViTModel.from_pretrained('D:/pythonProject/Features_Fusion'
-                                              '/config_catVSdog')
+        self.model = ViTModel.from_pretrained('/config')
         for param in self.model.parameters():
             param.requires_grad = False
 
@@ -262,13 +261,13 @@ class DeepFakeDetectionModel(nn.Module):
         self.head = nn.ModuleList([nn.Linear(768, num_classes) if num_classes > 0 else nn.Identity() for _ in
                                    range(self.num_branches)])  # 分类头
 
-    def forward_features(self, x):  # x是单张图片，分成空域和频域双分支，其实这里有点问题，应该是一个分支享有一个注意力，也就是说应该是1-4个交叉注意力
+    def forward_features(self, x):  # x是单张图片，分成空域和频域双分支
         """第一次特征提取"""
         xs = []  # 用于储存两个经过特征提取分支,手动储存
         tmp_img = self.ViT(x)  # 空域分支
         xs.append(tmp_img)
         # print('DCT形状', apply_dct_transform(x).shape)
-        tmp_dct = self.ViT(apply_dct_transform(x))  # 频域分支，频域变换这里可能有问题，后期留意
+        tmp_dct = self.ViT(apply_dct_transform(x))  # 频域分支
         xs.append(tmp_dct)  # 储存两分支张量
         # print('xs[0]', xs[0].shape)
 
@@ -282,7 +281,7 @@ class DeepFakeDetectionModel(nn.Module):
 
         """第一次特征融合"""
         cls_token.clear()
-        cls_token = [x[:, 0:1] for x in xs]  # 储存不同分支的CLS，这里的切片操作没有测试
+        cls_token = [x[:, 0:1] for x in xs]  # 储存不同分支的CLS
         outs = []
         for i in range(self.num_branches):  # 第一次特征融合，经过两次循环，特征分支储存在outs中
             tmp = torch.cat((cls_token[i], xs[(i + 1) % self.num_branches][:, 1:, ...]), dim=1)
@@ -340,14 +339,14 @@ class DeepFakeDetectionModel(nn.Module):
 
 
 # # 数据预处理
-# image_processor = ViTImageProcessor.from_pretrained('D:/pythonProject/Features_Fusion/config_catVSdog')
+# image_processor = ViTImageProcessor.from_pretrained('')
 #
 # # 选择设备
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # model = DeepFakeDetectionModel()
 # model.to(device)
 #
-# test_image_path = 'D:\pythonProject\Features_Fusion/0.jpg'
+# test_image_path = ''
 # image = Image.open(test_image_path).convert("RGB")
 # image = image_processor(image, return_tensors="pt").to(device)
 # # print(image)
@@ -359,10 +358,10 @@ class DeepFakeDetectionModel(nn.Module):
 # # print(model)
 def main():
     model = DeepFakeDetectionModel(num_blocks=4)
-    model.load_state_dict(torch.load('model_weights_all-RAW24-11-7-1.pth'), strict=False)
+    model.load_state_dict(torch.load(''), strict=False)
     # 定义数据集路径
-    train_dir = 'G:\PyTorchProgramming/202204\ch6cnn_demo\TFFF-main\exchange_faces\训练集和测试集raw/train'  # 这俩是测试用的数据集
-    val_dir = 'G:\PyTorchProgramming/202204\ch6cnn_demo\TFFF-main\exchange_faces\训练集和测试集raw/test'  # 保留，换成大数据集
+    train_dir = '' 
+    val_dir = ''
 
     train_transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -384,8 +383,7 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
 
     # # 加载预训练模型
-    # model = ViTForImageClassification.from_pretrained('D:/pythonProject/Features_Fusion/config_catVSdog', num_labels=2,
-    #                                                   ignore_mismatched_sizes=True)
+    # model = ViTForImageClassification.from_pretrained()
 
     # print('\n模型结构:\n', model)
     # 冻结特征提取部分的权重
@@ -393,7 +391,7 @@ def main():
     #     param.requires_grad = False
 
     # 只训练分类头
-    # model.classifier = nn.Linear(model.classifier.in_features, 2)  # 2类（猫和狗）
+    # model.classifier = nn.Linear(model.classifier.in_features, 2)  # 2类
 
     model.to(device)
 
@@ -453,20 +451,20 @@ def main():
     print(f"Validation Accuracy: {100 * correct / total:.2f}%, AUC: {100 * auc_value:.2f}%")
 
     # 保存模型权重
-    torch.save(model.state_dict(), 'model_weights_all-RAW24-12-2.pth')
+    torch.save(model.state_dict(), '')
 
 
 def evaluate():
     all_y_true = []
     all_y_scores = []
     model = DeepFakeDetectionModel(num_blocks=4).to(device)
-    model.load_state_dict(torch.load('model_weights_all-RAW24-12-2.pth'))
+    model.load_state_dict(torch.load(''))
     val_transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
     ])
-    val_root = 'G:\PyTorchProgramming/202204\ch6cnn_demo\TFFF-main\exchange_faces\训练集和测试集c23/testDF'
+    val_root = ''
     val_dataset = datasets.ImageFolder(val_root, val_transform)
     val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
     model.eval()
@@ -489,3 +487,4 @@ def evaluate():
 if __name__ == "__main__":
     main()
     # evaluate()
+
