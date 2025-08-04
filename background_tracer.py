@@ -73,7 +73,7 @@ class IdentityDataset(Dataset):
 
 # 身份匹配系统类
 class IdentityMatchingSystem:
-    def __init__(self, model_name='config_catVSdog', weights_path=None):
+    def __init__(self, model_name='config', weights_path=None):
         self.image_paths = None
         self.feature_database = None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -267,27 +267,27 @@ if __name__ == "__main__":
     #     transforms.Resize((224, 224)),
     #     transforms.ToTensor(),
     #     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    # ])  G:/yolov5-5.0/data/images
+    # ]) 
 
-    # 创建数据集  E:\dataset_raw\original_sequences\youtube\c0\images
-    dataset = IdentityDataset("G:\yolov5-5.0\data\images - 副本", transform=None)
-    dataloader = DataLoader(dataset, batch_size=16, shuffle=False)  # 洗牌是True
+    # 创建数据集 
+    dataset = IdentityDataset("", transform=None)
+    dataloader = DataLoader(dataset, batch_size=16, shuffle=False)  
 
     # 初始化身份匹配系统
     system = IdentityMatchingSystem(weights_path='model_weights_contrastive24-12-4.pth')
 
     # 读取训练好的权重
 
-    # system.load_state_dict(torch.load('model_weights_contrastive0-0003.pth'))
-    # 在小数据集上训练，得到好的结果 12-2是小数据集上收敛到0的结果
+    # system.load_state_dict(torch.load('model_weights_contrastive.pth'))
+    
     # 训练模型
-    system.train(dataloader, epochs=200)  # 然后在大数据集上画图，应该也有好的结果
+    system.train(dataloader, epochs=200)  
 
-    # 构建特征数据库  "G:/yolov5-5.0/data/images"
-    system.build_feature_database("G:/yolov5-5.0/data/特征库小样本")
+    # 构建特征数据库 
+    system.build_feature_database("")
 
     # 测试查询
-    query_img_path = "D:\pythonProject\Features_Fusion\F2F_raw/r.png"
+    query_img_path = ""
     query_img = Image.open(query_img_path).convert('RGB')
     query_img.show()
     # query_img = transform(query_img)
@@ -300,4 +300,5 @@ if __name__ == "__main__":
     # 显示最相似的图像（可选）
     # similar_image = Image.open(similar_image_path)
     # similar_image.show()
+
 
