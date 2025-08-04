@@ -66,7 +66,7 @@ if __name__ == '__main__':
     options = ['train', 'eval']
     option = options[0]
     # layer_num = 11  # 一共16层
-    data_path = 'G:\PyTorchProgramming/202204\ch6cnn_demo\TFFF-main\exchange_faces/200张的原始测试图'
+    data_path = ''
     tb_writer = SummaryWriter()
     train_images_path, train_images_label, val_images_path, val_images_label = read_split_data(data_path)
     # 加载数据集
@@ -123,3 +123,4 @@ if __name__ == '__main__':
                                      data_loader=val_loader,
                                      device=device,
                                      epoch=9)
+
